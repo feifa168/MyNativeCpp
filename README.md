@@ -1,5 +1,5 @@
 ## 简介
->MyNativeCpp是一个为项目MyNativeHello提供native方法的动态库工程。
+>MyNativeCpp是一个为项目MyNativeJava提供native方法的动态库工程。
 >使用环境
 * 环境 win7 64位系统
 * java: IDEA 2018.1 + jdk1.8
@@ -19,39 +19,39 @@
 >待补充
 
 ### native接口文件
->include目录下javah生成的接口文件，具体操作参见[native接口生成](https://github.com/feifa168/MyNativeHello/README.md)。
-[接口文件](https://github.com/feifa168/MyNativeCpp/com_ft_mynative_MyNativeHello.h)会逐步更新，主要用于测试
+>include目录下javah生成的接口文件，具体操作参见[native接口生成](https://github.com/feifa168/MyNativeJava/README.md)。
+[接口文件](https://github.com/feifa168/MyNativeCpp/com_ft_mynative_MyNativeJava.h)会逐步更新，主要用于测试
 ```c++
 #include <jni.h>
-/* Header for class com_ft_mynative_MyNativeHello */
+/* Header for class com_ft_mynative_MyNativeJava */
 
-#ifndef _Included_com_ft_mynative_MyNativeHello
-#define _Included_com_ft_mynative_MyNativeHello
+#ifndef _Included_com_ft_mynative_MyNativeJava
+#define _Included_com_ft_mynative_MyNativeJava
 #ifdef __cplusplus
 extern "C" {
 #endif
 /*
- * Class:     com_ft_mynative_MyNativeHello
+ * Class:     com_ft_mynative_MyNativeJava
  * Method:    fun
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeHello_fun
+JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_fun
   (JNIEnv *, jobject);
 
 /*
- * Class:     com_ft_mynative_MyNativeHello
+ * Class:     com_ft_mynative_MyNativeJava
  * Method:    fun2
  * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_com_ft_mynative_MyNativeHello_fun2
+JNIEXPORT jint JNICALL Java_com_ft_mynative_MyNativeJava_fun2
   (JNIEnv *, jobject, jstring);
 
 /*
- * Class:     com_ft_mynative_MyNativeHello
+ * Class:     com_ft_mynative_MyNativeJava
  * Method:    fun3
  * Signature: ([Ljava/lang/Integer;)V
  */
-JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeHello_fun3
+JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_fun3
   (JNIEnv *, jobject, jobjectArray);
 
 #ifdef __cplusplus
@@ -67,42 +67,42 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeHello_fun3
 [CMakeList.txt](https://github.com/feifa168/MyNativeCpp/CMakeList.txt)
 ```
 cmake_minimum_required(VERSION 3.12)
-project(MyNativeHello)
+project(MyNativeJava)
 
 set(CMAKE_CXX_STANDARD 14)
 
 set(INC_DIR D:/java/jdk1.8.0_192/include;D:/java/jdk1.8.0_192/include/win32;../include)
 set(LINK_DIR D:/java/jdk1.8.0_192/lib)
-set(SOURCE_FILES com_ft_mynative_MyNativeHello.cpp com_ft_mynative_MyNativeHello.h)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../../MyNativeHello")
+set(SOURCE_FILES com_ft_mynative_MyNativeJava.cpp com_ft_mynative_MyNativeJava.h)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../../MyNativeJava")
 
 include_directories(${INC_DIR})
 link_directories(${LINK_DIR})
 link_libraries(jvm jawt)
 
-add_library(MyNativeHello SHARED com_ft_mynative_MyNativeHello.cpp com_ft_mynative_MyNativeHello.h)
+add_library(MyNativeJava SHARED com_ft_mynative_MyNativeJava.cpp com_ft_mynative_MyNativeJava.h)
 ```
 
-生成的dll直接指定输出到[MyNativeHello](https://github.com/feifa168/MyNativeHello)目录下，CMakeLists.txt中设置set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../../MyNativeHello")，需要MyNativeHello与MyNativeCpp放在一个目录下。
+生成的dll直接指定输出到[MyNativeJava](https://github.com/feifa168/MyNativeJava)目录下，CMakeLists.txt中设置set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../../MyNativeJava")，需要MyNativeJava与MyNativeCpp放在一个目录下。
 具体方法请参考源代码
 
 
 ### java使用本地方法
-详情参见[java调用动态库](https://github.com/feifa168/MyNativeHello/README.md)
+详情参见[java调用动态库](https://github.com/feifa168/MyNativeJava/README.md)
 >静态块加载dll
 ```java
-public class MyNativeHello {
+public class MyNativeJava {
     static {
-        System.loadLibrary("libMyNativeHello");
+        System.loadLibrary("libMyNativeJava");
     }
 }
 ```
 >加载成功就可以使用native方法了，fun，fun2，fun3是测试用的几个方法，后续会加入更多内容，比如类成员修改，类方法执行等。
-详情参见[MyNativeHello.java](https://github.com/feifa168/MyNativeHello/blob/master/src/main/java/com/ft/mynative/MyNativeHello.java)
+详情参见[MyNativeJava.java](https://github.com/feifa168/MyNativeJava/blob/master/src/main/java/com/ft/mynative/MyNativeJava.java)
 ```java
-public class MyNativeHello {
+public class MyNativeJava {
     static {
-        System.loadLibrary("libMyNativeHello");
+        System.loadLibrary("libMyNativeJava");
     }
 
     private native void fun();
@@ -110,7 +110,7 @@ public class MyNativeHello {
     private native void fun3(Integer[] ia);
 
     public static void main(String[] args) {
-        MyNativeHello nativeHello = new MyNativeHello();
+        MyNativeJava nativeHello = new MyNativeJava();
         nativeHello.fun();
         System.out.println(nativeHello.fun2("hello, tom"));
         nativeHello.fun3(new Integer[]{3, 5});

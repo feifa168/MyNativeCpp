@@ -1,5 +1,4 @@
-#include "com_ft_mynative_MyNativeHello.h"
-#include "jni.h"
+#include "com_ft_mynative_MyNativeJava.h"
 
 #include <iostream>
 #include <cstring>
@@ -8,21 +7,21 @@ using std::cout;
 using std::endl;
 
  /*
- * Class:     com_ft_mynative_MyNativeHello
+ * Class:     com_ft_mynative_MyNativeJava
  * Method:    fun
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeHello_fun
+JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_fun
 (JNIEnv *, jobject) {
     cout << "fun()" << endl;
 }
 
 /*
- * Class:     com_ft_mynative_MyNativeHello
+ * Class:     com_ft_mynative_MyNativeJava
  * Method:    fun2
  * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_com_ft_mynative_MyNativeHello_fun2
+JNIEXPORT jint JNICALL Java_com_ft_mynative_MyNativeJava_fun2
         (JNIEnv *env, jobject thisObj, jstring str) {
     const char *cStr = env->GetStringUTFChars(str, NULL);
     if (NULL != cStr) {
@@ -38,11 +37,11 @@ JNIEXPORT jint JNICALL Java_com_ft_mynative_MyNativeHello_fun2
 }
 
 /*
- * Class:     com_ft_mynative_MyNativeHello
+ * Class:     com_ft_mynative_MyNativeJava
  * Method:    fun3
  * Signature: ([Ljava/lang/Integer;)V
  */
-JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeHello_fun3
+JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_fun3
 (JNIEnv *env, jobject thisObj, jobjectArray intArr) {
     jclass clsInteger = env->FindClass("java/lang/Integer");
     if (NULL == clsInteger) {
