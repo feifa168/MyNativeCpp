@@ -68,3 +68,221 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_fun3
     }
     cout << "total is " << sum << endl;
 }
+
+/*
+ * Class:     com_ft_mynative_MyNativeJava
+ * Method:    baseTypes
+ * Signature: (ICZSJFDB)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_ft_mynative_MyNativeJava_baseTypes
+        (JNIEnv *env, jobject thisObj, jint ia, jchar cb, jboolean bc, jshort sd, jlong le, jfloat ff, jdouble dj, jbyte bh) {
+    cout << " jint " << ia      << endl;
+    cout << " jchar " << cb     << endl;
+    cout << " jboolean " << (bc==JNI_TRUE)  << endl;
+    cout << " jshort " << sd    << endl;
+    cout << " jlong " << le     << endl;
+    cout << " jfloat " << ff    << endl;
+    cout << " jdouble " << dj   << endl;
+    cout << " jbyte " << bh     << endl;
+
+    cout << "jXXX 直接转换成 XXX" << endl;
+
+    int xxx_ia  = ia;
+    char xxx_cb = cb;
+    bool xxx_bc = (bc==JNI_TRUE);
+    short xxx_sd = sd;
+    long xxx_le = le;
+    float xxx_ff = ff;
+    double xxx_dj = dj;
+    unsigned char xxx_bh = bh;
+
+    cout << " int " << xxx_ia      << endl;
+    cout << " char " << xxx_cb     << endl;
+    cout << " boolean " << xxx_bc  << endl;
+    cout << " short " << xxx_sd    << endl;
+    cout << " long " << xxx_le     << endl;
+    cout << " float " << xxx_ff    << endl;
+    cout << " double " << xxx_dj   << endl;
+    cout << " byte " << xxx_bh     << endl;
+
+    return true;
+}
+
+template<typename T>
+void parse_wrap_base_type(JNIEnv *env, jobject thisObj, const char *className, const char *methodName, const char *rparams) {
+    jclass cls = NULL;
+    jmethodID mid = NULL;
+
+    cls = env->FindClass(className);
+    if (NULL == cls) {
+        cout << "FindClass(" << className << ") fail" << endl;
+        return;
+    }
+    mid = env->GetMethodID(cls, methodName, rparams);
+    if (NULL == mid) {
+        cout << "get method " << methodName << "(" << rparams << ") fail" << endl;
+        return;
+    }
+    T t = (T)env->CallIntMethod(thisObj, mid);
+    cout << "parse_wrap_base_type<T>(" << className << ", " << methodName << ", " << rparams << ") = " << t << endl;
+}
+
+/*
+ * Class:     com_ft_mynative_MyNativeJava
+ * Method:    wrapBaseTypes
+ * Signature: (Ljava/lang/Integer;Ljava/lang/Character;Ljava/lang/Boolean;Ljava/lang/Short;Ljava/lang/Long;Ljava/lang/Float;Ljava/lang/Double;Ljava/lang/Byte;)Ljava/lang/Boolean;
+ */
+JNIEXPORT jobject JNICALL Java_com_ft_mynative_MyNativeJava_wrapBaseTypes
+        (JNIEnv *env, jobject thisObj, jobject ia, jobject cb, jobject bc, jobject sd, jobject le, jobject ff, jobject dh, jobject bi) {
+//    new Integer(5).intValue();
+//    new Boolean(false).booleanValue();
+//    new Short((short)4).shortValue();
+//    new Long((long)6).longValue();
+//    new Character('a').charValue();
+//    new Float(5.0f).floatValue();
+//    new Double(5.9).doubleValue();
+//    new Byte((byte)5).byteValue();
+//    Boolean.valueOf(false);
+    parse_wrap_base_type<int>(env,              ia, "Ljava/lang/Integer;",      "intValue",     "()I");
+    parse_wrap_base_type<bool>(env,             bc, "Ljava/lang/Boolean;",      "booleanValue", "()Z");
+    parse_wrap_base_type<char>(env,             cb, "Ljava/lang/Character;",    "charValue",    "()C");
+    parse_wrap_base_type<short>(env,            sd, "Ljava/lang/Short;",        "shortValue",   "()S");
+    parse_wrap_base_type<long>(env,             le, "Ljava/lang/Long;",         "longValue",    "()J");
+    parse_wrap_base_type<float>(env,            ff, "Ljava/lang/Float;",        "floatValue",   "()F");
+    parse_wrap_base_type<double>(env,           dh, "Ljava/lang/Double;",       "doubleValue",  "()D");
+    parse_wrap_base_type<unsigned char>(env,   bi, "Ljava/lang/Byte;",         "byteValue",    "()B");
+
+    jobject obj = NULL;
+    jmethodID mid = NULL;
+    jclass cls = env->FindClass("Ljava/lang/Boolean;");
+    if (NULL != cls) {
+        mid = env->GetMethodID(cls, "<init>", "(Z)V");
+        if (NULL != mid) {
+            obj = env->NewObject(cls, mid, true);
+            cout << "use constructor method conv is ok" << endl;
+        }
+
+        mid = env->GetStaticMethodID(cls, "valueOf", "(Z)Ljava/lang/Boolean;");
+        if (NULL != mid) {
+            env->CallStaticBooleanMethod(cls, mid, false);
+            cout << "use static method conv is ok" << endl;
+        }
+    }
+
+    return obj;
+}
+
+/*
+ * Class:     com_ft_mynative_MyNativeJava
+ * Method:    intArray
+ * Signature: ([I)[Z
+ */
+JNIEXPORT jbooleanArray JNICALL Java_com_ft_mynative_MyNativeJava_intArray
+        (JNIEnv *env, jobject thisObj, jintArray intA) {
+    jsize len = env->GetArrayLength(intA);
+    jint ji = 0;
+    jint sum = 0;
+    cout << "conv jintArray to c int[], len is " << len << ", items is " << endl;
+
+    jclass cls = env->FindClass("Ljava/lang/Boolean;");
+    jbooleanArray boolArr = env->NewBooleanArray(len);
+    jboolean *bools = new jboolean[len];
+
+    jboolean jb = false;
+    jint *jia = env->GetIntArrayElements(intA, &jb);
+    if (NULL != jia) {
+        for (int i=0; i<len; i++) {
+            ji = jia[i];
+            sum += ji;
+            cout << ji << ", ";
+
+            // num 偶数 则为 true，否则为false
+            bools[i] = (ji&1) == 1 ? true : false;
+        }
+        env->SetBooleanArrayRegion(boolArr, 0, len, bools);
+        env->ReleaseIntArrayElements(intA, jia, 0);
+    }
+    cout << " total is " << sum << endl;
+
+    return boolArr;
+}
+
+/*
+ * Class:     com_ft_mynative_MyNativeJava
+ * Method:    wrapIntArray
+ * Signature: ([Ljava/lang/Integer;)[Ljava/lang/Boolean;
+ */
+JNIEXPORT jobjectArray JNICALL Java_com_ft_mynative_MyNativeJava_wrapIntArray
+        (JNIEnv *env, jobject thisObj, jobjectArray intA) {
+    jsize len = env->GetArrayLength(intA);
+    jint ji = 0;
+    jint sum = 0;
+    cout << "conv jintArray to c int[], len is " << len << ", items is " << endl;
+
+    jclass cls = env->FindClass("Ljava/lang/Boolean;");
+    jobjectArray boolArr = env->NewObjectArray(len, cls, NULL);
+    //jbooleanArray boolArr = env->NewBooleanArray(len);
+
+//    jboolean jb = false;
+//    jint *jia = env->GetIntArrayElements(intA, &jb);
+//    if (NULL != jia) {
+//        for (int i=0; i<len; i++) {
+//            ji = jia[i];
+//            sum += ji;
+//            cout << ji << ", ";
+//
+//            // num 偶数 则为 true，否则为false
+//            jobject obj = NULL;
+//            if (NULL != cls) {
+//                jmethodID mid = env->GetStaticMethodID(cls, "valueOf", "(Z)Ljava/lang/Boolean;");
+//                jboolean isok = (ji&1)==1 ? true : false;
+//                if (NULL != mid) {
+//                    obj = env->CallStaticObjectMethod(cls, mid, isok);
+//                    env->SetObjectArrayElement(boolArr, i, obj);
+//                }
+//            }
+//        }
+//        env->ReleaseIntArrayElements(intA, jia, 0);
+//    }
+    cout << " total is " << sum << endl;
+
+    return boolArr;
+}
+
+/*
+ * Class:     com_ft_mynative_MyNativeJava
+ * Method:    stringTest
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_ft_mynative_MyNativeJava_stringTest
+        (JNIEnv *env, jobject thisObj, jstring) {
+    return NULL;
+}
+
+/*
+ * Class:     com_ft_mynative_MyNativeJava
+ * Method:    strArrTest
+ * Signature: ([Ljava/lang/String;)[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_com_ft_mynative_MyNativeJava_strArrTest
+        (JNIEnv *env, jobject thisObj, jobjectArray) {
+    return NULL;
+}
+
+/*
+ * Class:     com_ft_mynative_MyNativeJava
+ * Method:    modifyFields
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_modifyFields
+        (JNIEnv *, jobject) {
+}
+
+/*
+ * Class:     com_ft_mynative_MyNativeJava
+ * Method:    testMethod
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_testMethod
+        (JNIEnv *, jobject) {
+}
