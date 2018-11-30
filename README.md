@@ -19,9 +19,14 @@
 ### jni概述
 >待补充
 
+>参考
+* [JNI学习笔记](http://jellypaul.github.io/java/2016/08/08/JNI%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.html)
+* [Java Programming Tutorial Java Native Interface](https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html)
+
 ### native接口文件
->include目录下javah生成的接口文件，具体操作参见[native接口生成](https://github.com/feifa168/MyNativeJava/README.md)。
-[接口文件](https://github.com/feifa168/MyNativeCpp/com_ft_mynative_MyNativeJava.h)会逐步更新，主要用于测试
+>include目录下javah生成的接口文件，具体操作参见[native接口生成](https://github.com/feifa168/MyNativeJava/blob/master/README.md)。
+
+>[接口文件](https://github.com/feifa168/MyNativeCpp/blob/master/com_ft_mynative_MyNativeJava.h)会逐步更新，主要用于测试
 ```c++
 #include <jni.h>
 /* Header for class com_ft_mynative_MyNativeJava */
@@ -65,7 +70,7 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_fun3
 >CLion生成动态库，jdk是64位，原本使用的Mingw是32位程序，生成的dll在64位java程序中不能使用，
 又下载了mingw64，配置使CLion使用64位mingw，CLion使用CMake编译程序。
 
-[CMakeList.txt](https://github.com/feifa168/MyNativeCpp/CMakeList.txt)
+[CMakeList.txt](https://github.com/feifa168/MyNativeCpp/blob/master/CMakeLists.txt)
 ```
 cmake_minimum_required(VERSION 3.12)
 project(MyNativeJava)
@@ -89,7 +94,7 @@ add_library(MyNativeJava SHARED com_ft_mynative_MyNativeJava.cpp com_ft_mynative
 
 
 ### java使用本地方法
-详情参见[java调用动态库](https://github.com/feifa168/MyNativeJava/README.md)
+详情参见[java调用动态库](https://github.com/feifa168/MyNativeJava/blob/master/README.md)
 >静态块加载dll
 ```java
 public class MyNativeJava {
