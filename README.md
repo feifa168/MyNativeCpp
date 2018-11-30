@@ -6,7 +6,7 @@
 * java: IDEA 2018.1 + jdk1.8
 * c++ : CLion 2018.2 + mingw-w64
 * 依赖库及文件
-    * **jvm.lib** %JAVA_HOME%\lib
+    * **%JAVA_HOME%\lib\jvm.lib**
     * **%JAVA_HOME%\include;%JAVA_HOME%\include\jni.h**
     * **%JAVA_HOME%\include;%JAVA_HOME%\include\win32\jni_md.h**
 
