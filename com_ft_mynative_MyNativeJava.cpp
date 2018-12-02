@@ -150,7 +150,7 @@ JNIEXPORT jobject JNICALL Java_com_ft_mynative_MyNativeJava_wrapBaseTypes
     parse_wrap_base_type<long>(env,             le, "Ljava/lang/Long;",         "longValue",    "()J");
     parse_wrap_base_type<float>(env,            ff, "Ljava/lang/Float;",        "floatValue",   "()F");
     parse_wrap_base_type<double>(env,           dh, "Ljava/lang/Double;",       "doubleValue",  "()D");
-    parse_wrap_base_type<unsigned char>(env,   bi, "Ljava/lang/Byte;",         "byteValue",    "()B");
+    parse_wrap_base_type<unsigned char>(env,    bi, "Ljava/lang/Byte;",         "byteValue",    "()B");
 
     jobject obj = NULL;
     jmethodID mid = NULL;
@@ -213,37 +213,41 @@ JNIEXPORT jbooleanArray JNICALL Java_com_ft_mynative_MyNativeJava_intArray
  * Signature: ([Ljava/lang/Integer;)[Ljava/lang/Boolean;
  */
 JNIEXPORT jobjectArray JNICALL Java_com_ft_mynative_MyNativeJava_wrapIntArray
-        (JNIEnv *env, jobject thisObj, jobjectArray intA) {
-    jsize len = env->GetArrayLength(intA);
+        (JNIEnv *env, jobject thisObj, jobjectArray integerA) {
+    jsize len = env->GetArrayLength(integerA);
     jint ji = 0;
     jint sum = 0;
     cout << "conv jintArray to c int[], len is " << len << ", items is " << endl;
 
     jclass cls = env->FindClass("Ljava/lang/Boolean;");
-    jobjectArray boolArr = env->NewObjectArray(len, cls, NULL);
-    //jbooleanArray boolArr = env->NewBooleanArray(len);
 
-//    jboolean jb = false;
-//    jint *jia = env->GetIntArrayElements(intA, &jb);
-//    if (NULL != jia) {
-//        for (int i=0; i<len; i++) {
-//            ji = jia[i];
-//            sum += ji;
-//            cout << ji << ", ";
-//
-//            // num 偶数 则为 true，否则为false
-//            jobject obj = NULL;
-//            if (NULL != cls) {
-//                jmethodID mid = env->GetStaticMethodID(cls, "valueOf", "(Z)Ljava/lang/Boolean;");
-//                jboolean isok = (ji&1)==1 ? true : false;
-//                if (NULL != mid) {
-//                    obj = env->CallStaticObjectMethod(cls, mid, isok);
-//                    env->SetObjectArrayElement(boolArr, i, obj);
-//                }
-//            }
-//        }
-//        env->ReleaseIntArrayElements(intA, jia, 0);
-//    }
+    jobjectArray boolArr = env->NewObjectArray(len, cls, NULL);
+
+    jboolean jb = false;
+    jobject jobj = NULL;
+    for (int i=0; i<len; i++) {
+        jobj = env->GetObjectArrayElement(integerA, i);
+        if (NULL != jobj) {
+            jmethodID mid = env->GetMethodID(env->FindClass("Ljava/lang/Integer;"), "intValue", "()I");
+            if (NULL != mid) {
+                ji = (jint)env->CallIntMethod(jobj, mid);
+                sum += ji;
+                cout << ji << ", ";
+
+                // num 偶数 则为 true，否则为false
+                jobject obj = NULL;
+                if (NULL != cls) {
+                    jmethodID mid = env->GetStaticMethodID(cls, "valueOf", "(Z)Ljava/lang/Boolean;");
+                    jboolean isok = (ji&1)==1 ? true : false;
+                    if (NULL != mid) {
+                        obj = env->CallStaticObjectMethod(cls, mid, isok);
+                        env->SetObjectArrayElement(boolArr, i, obj);
+                    }
+                }
+            }
+        }
+    }
+
     cout << " total is " << sum << endl;
 
     return boolArr;
@@ -255,8 +259,16 @@ JNIEXPORT jobjectArray JNICALL Java_com_ft_mynative_MyNativeJava_wrapIntArray
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_com_ft_mynative_MyNativeJava_stringTest
-        (JNIEnv *env, jobject thisObj, jstring) {
-    return NULL;
+        (JNIEnv *env, jobject thisObj, jstring jstr) {
+    jboolean isok = false;
+    const char *cstr = env->GetStringUTFChars(jstr, NULL);
+    cout << "input str is \"" <<  cstr <<"\"" << endl;
+    env->ReleaseStringUTFChars(jstr, cstr);
+
+    char buf[256];
+    sprintf(buf, "\"%s\" is modifyed", cstr);
+    jstring jsret = env->NewStringUTF(buf);
+    return jsret;
 }
 
 /*
@@ -265,8 +277,26 @@ JNIEXPORT jstring JNICALL Java_com_ft_mynative_MyNativeJava_stringTest
  * Signature: ([Ljava/lang/String;)[Ljava/lang/String;
  */
 JNIEXPORT jobjectArray JNICALL Java_com_ft_mynative_MyNativeJava_strArrTest
-        (JNIEnv *env, jobject thisObj, jobjectArray) {
-    return NULL;
+        (JNIEnv *env, jobject thisObj, jobjectArray jobjA) {
+    int len = env->GetArrayLength(jobjA);
+    cout << "String[] len is " << len << ", items is " << endl;
+    if (len < 1) {
+        return NULL;
+    }
+
+    jobjectArray jobjs = env->NewObjectArray(len, env->FindClass("Ljava/lang/String;"), NULL);
+    for (int i=0; i<len; i++) {
+        jstring jstr1 = (jstring)env->GetObjectArrayElement(jobjA, i);
+        const char *js = env->GetStringUTFChars(jstr1, NULL);
+        cout << js << ", " << endl;
+        char buf[256];
+        sprintf(buf, "%s after modify", js);
+        env->ReleaseStringUTFChars(jstr1, js);
+
+        jstring jstr = env->NewStringUTF(buf);
+        env->SetObjectArrayElement(jobjs, i, jstr);
+    }
+    return jobjs;
 }
 
 /*
@@ -275,7 +305,46 @@ JNIEXPORT jobjectArray JNICALL Java_com_ft_mynative_MyNativeJava_strArrTest
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_modifyFields
-        (JNIEnv *, jobject) {
+        (JNIEnv *env, jobject thisObj) {
+//    private int num = 5;
+//    private char[] ca = {'a', 'b'};
+//    private String str = "tom";
+//    private String[] strA = {"one", "two"};
+//
+//    private static int snum = 5;
+//    private static char[] sca = {'a', 'b'};
+//    private static String sstr = "bruce";
+//    private static String[] sstrA = {"Monday", "Tuesty"};
+    jclass cls = env->GetObjectClass(thisObj);
+    if (NULL == cls) {
+        cout << "getObjectClass is NULL" << endl;
+        return;
+    }
+    jfieldID fid = NULL;
+    fid = env->GetFieldID(cls, "num", "I");
+    if (NULL != fid) {
+        jint it = env->GetIntField(thisObj, fid);
+        env->SetIntField(thisObj, fid, it+2);
+        cout << "modify filed num from " << it << " to " << it+2 << endl;
+    }
+
+    // modify char[] -> +2
+    fid = env->GetFieldID(cls, "ca", "[C");
+    if (NULL != fid) {
+        jcharArray carr = (jcharArray)env->GetObjectField(thisObj, fid);
+        int arrLen = env->GetArrayLength(carr);
+        char *cs = (char*)env->GetCharArrayElements(carr, NULL);
+        cout << "modify field ca['a', 'b'] len is " << arrLen << endl;
+        carr = env->NewCharArray(arrLen);
+        jchar *pca = new jchar[arrLen];
+        for (int i=0; i<arrLen; i++) {
+            cout << "from " << cs[i] << " to " << (char)(cs[i]+2) << endl;
+            pca[i] = cs[i] + 2;
+        }
+        env->SetCharArrayRegion(carr, 0, arrLen, pca);
+        env->SetObjectField(thisObj, fid, carr);
+        env->ReleaseCharArrayElements(carr, (jchar*)cs, 0);
+    }
 }
 
 /*
@@ -284,5 +353,5 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_modifyFields
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_testMethod
-        (JNIEnv *, jobject) {
+        (JNIEnv *env, jobject thisObj) {
 }
