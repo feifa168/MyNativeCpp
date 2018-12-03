@@ -321,6 +321,8 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_modifyFields
         return;
     }
     jfieldID fid = NULL;
+
+    // private int num = 5; + 2
     fid = env->GetFieldID(cls, "num", "I");
     if (NULL != fid) {
         jint it = env->GetIntField(thisObj, fid);
@@ -328,7 +330,7 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_modifyFields
         cout << "modify filed num from " << it << " to " << it+2 << endl;
     }
 
-    // modify char[] -> +2
+    // modify private char[] ca = {'a', 'b'}; + 2
     fid = env->GetFieldID(cls, "ca", "[C");
     if (NULL != fid) {
         jcharArray carr = (jcharArray)env->GetObjectField(thisObj, fid);
@@ -345,6 +347,50 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_modifyFields
         env->SetObjectField(thisObj, fid, carr);
         env->ReleaseCharArrayElements(carr, (jchar*)cs, 0);
     }
+
+    // modify private String str = "tom"; + 2
+    // modify private String[] strA = {"one", "two"}; + 2
+
+    // modify private static int snum = 5; + 2
+    fid = env->GetStaticFieldID(cls, "snum", "I");
+    if (NULL != fid) {
+        jint jit = env->GetStaticIntField(cls, fid);
+        env->SetStaticIntField(cls, fid, jit+2);
+        cout << "modify static snum from " << jit << " to " << jit+2 << endl;
+    }
+    // modify private static char[] sca = {'a', 'b'}; + 2
+    // modify private static String sstr = "bruce"; + 2
+    // modify private static String[] sstrA = {"Monday", "Tuesty"}; + 2
+    fid = env->GetStaticFieldID(cls, "sstrA", "[Ljava/lang/String;");
+    if (NULL != fid) {
+        jobjectArray strArr = (jobjectArray)env->GetStaticObjectField(cls, fid);
+        int len = env->GetArrayLength(strArr);
+        if (len > 0) {
+            cout << "modify static String[] sstrA, len is " << len << endl;
+            cout << "before modify items is " << endl;
+            for (int i=0; i<len; i++) {
+                jstring str = (jstring)env->GetObjectArrayElement(strArr, i);
+                const char *cstr = env->GetStringUTFChars(str, NULL);
+                cout << cstr << ", " << endl;
+
+                char buf[128];
+                sprintf(buf, "%s after modify", cstr);
+                jstring jstr2 = env->NewStringUTF(buf);
+                env->SetObjectArrayElement(strArr, i, jstr2);
+                env->ReleaseStringUTFChars(str, cstr);
+            }
+
+            cout << "after modify items is " << endl;
+            for (int i=0; i<len; i++) {
+                jstring str = (jstring)env->GetObjectArrayElement(strArr, i);
+                const char *cstr = env->GetStringUTFChars(str, NULL);
+                cout << cstr << ", " << endl;
+                env->ReleaseStringUTFChars(str, cstr);
+            }
+
+            env->SetStaticObjectField(cls, fid, strArr);
+        }
+    }
 }
 
 /*
@@ -354,4 +400,42 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_modifyFields
  */
 JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_testMethod
         (JNIEnv *env, jobject thisObj) {
+
+    jclass cls = env->GetObjectClass(thisObj);
+    if (NULL == cls) {
+        cout << "getobjectclass is null" << endl;
+        return;
+    }
+
+    jmethodID mid = NULL;
+//    private void testInt(int a);
+    mid = env->GetMethodID(cls, "testInt", "(I)V");
+    if (NULL != mid) {
+        env->CallVoidMethod(thisObj, mid, 5);
+    }
+
+//    private void testString(String s);
+    mid = env->GetMethodID(cls, "testString", "(Ljava/lang/String;)V");
+    if (NULL != mid) {
+        char *cstr = new char[32];
+        strcpy(cstr, "this is c string");
+        jstring jstr = env->NewStringUTF(cstr);
+        env->CallVoidMethod(thisObj, mid, jstr);
+        // 不能释放，会出错，让java自己释放
+        //env->ReleaseStringUTFChars(jstr, cstr);
+    }
+
+//    private static void stestInt(int a);
+    mid = env->GetStaticMethodID(cls, "stestInt", "(I)V");
+    if (NULL != mid) {
+        env->CallStaticVoidMethod(cls, mid, 5);
+    }
+//    private static void stestString(String s);
+    mid = env->GetStaticMethodID(cls, "stestString", "(Ljava/lang/String;)V");
+    if (NULL != mid) {
+        const char *cstr = "this is c string";
+        jstring jstr = env->NewStringUTF(cstr);
+        env->CallStaticVoidMethod(cls, mid, jstr);
+        //env->ReleaseStringUTFChars(jstr, cstr);
+    }
 }
