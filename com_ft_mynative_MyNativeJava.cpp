@@ -333,13 +333,13 @@ JNIEXPORT void JNICALL Java_com_ft_mynative_MyNativeJava_modifyFields
     if (NULL != fid) {
         jcharArray carr = (jcharArray)env->GetObjectField(thisObj, fid);
         int arrLen = env->GetArrayLength(carr);
-        char *cs = (char*)env->GetCharArrayElements(carr, NULL);
+        jchar *cs = (jchar*)env->GetCharArrayElements(carr, NULL);
         cout << "modify field ca['a', 'b'] len is " << arrLen << endl;
         carr = env->NewCharArray(arrLen);
         jchar *pca = new jchar[arrLen];
         for (int i=0; i<arrLen; i++) {
-            cout << "from " << cs[i] << " to " << (char)(cs[i]+2) << endl;
             pca[i] = cs[i] + 2;
+            cout << "from " << (char)cs[i] << " to " << (char)((char)(cs[i])+2) << endl;
         }
         env->SetCharArrayRegion(carr, 0, arrLen, pca);
         env->SetObjectField(thisObj, fid, carr);
