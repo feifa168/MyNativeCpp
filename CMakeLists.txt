@@ -3,9 +3,11 @@ project(MyNativeJava)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set (JAVA_HOME D:/java/jdk1.8.0_191)
+set(JAVA_HOME $ENV{JAVA_HOME})
+#set(JAVA_HOME D:/java/jdk1.8.0_192)
+
 set(INC_DIR ${JAVA_HOME}/include;${JAVA_HOME}/include/win32;../include)
-set(LINK_DIR D:/java/jdk1.8/lib)
+set(LINK_DIR ${JAVA_HOME}/lib)
 set(SOURCE_FILES com_ft_mynative_MyNativeJava.cpp com_ft_mynative_MyNativeJava.h)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../../MyNativeJava")
 
